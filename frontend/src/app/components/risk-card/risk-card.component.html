@@ -1,0 +1,29 @@
+<div [class]="'rounded-2xl border p-6 ' + colors.border + ' ' + colors.bg + ' ' + colors.glow">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Risk Score</h3>
+    <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + colors.bg + ' ' + colors.text + ' ' + colors.border">
+      {{ risk.level }}
+    </span>
+  </div>
+
+  <div [class]="'text-5xl font-black mb-4 ' + colors.text">
+    {{ risk.score }}
+  </div>
+
+  <div class="space-y-2">
+    @for (f of risk.factors; track $index) {
+      <div class="flex items-start gap-2">
+        <span [class]="'text-xs font-mono mt-0.5 flex-shrink-0 ' + colors.text">+{{ f.points }}</span>
+        <div>
+          <span class="text-sm text-slate-300">{{ f.label }}</span>
+          @if (f.detail) {
+            <span class="text-xs text-slate-500 ml-1">({{ f.detail }})</span>
+          }
+        </div>
+      </div>
+    }
+    @if (risk.factors.length === 0) {
+      <p class="text-sm text-slate-500">No risk factors detected</p>
+    }
+  </div>
+</div>

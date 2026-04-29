@@ -1,0 +1,104 @@
+@if (loading) {
+  <div class="flex items-center justify-center py-24">
+    <div class="text-center">
+      <div class="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-slate-400 text-sm">Loading operational summary...</p>
+    </div>
+  </div>
+}
+
+@if (!loading && (error || !data)) {
+  <div class="text-center py-24">
+    <p class="text-rose-400">{{ error || 'Failed to load summary' }}</p>
+  </div>
+}
+
+@if (!loading && data) {
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center gap-3 animate-slideDown">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+        <span class="text-lg">📊</span>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-100">Operations Control Tower</h2>
+        <p class="text-xs text-slate-500">Live aggregates from BigQuery · Click any account to see full 360 view</p>
+      </div>
+    </div>
+
+    <!-- Stat Cards Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      @for (card of statCards; track card.label; let i = $index) {
+        <div
+          [class]="card.bg + ' rounded-xl border border-slate-700/50 p-4 animate-scaleIn'"
+          [style.animation-delay]="(i * 0.04) + 's'">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-base">{{ card.icon }}</span>
+            <span class="text-xs text-slate-400">{{ card.label }}</span>
+          </div>
+          <p [class]="'text-2xl font-bold animate-countUp ' + (card.accent || 'text-slate-200')">
+            {{ card.value }}
+          </p>
+          <p class="text-[10px] text-slate-500 mt-1">{{ card.sub }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- AI Insights -->
+    <div class="bg-slate-800/30 rounded-xl border border-slate-700/50 p-4 animate-fadeIn" [style.animation-delay]="'0.3s'">
+      <div class="flex items-center gap-2 mb-3">
+        <span>💡</span>
+        <h3 class="text-sm font-semibold text-slate-200">What This Means</h3>
+        <span class="text-[10px] text-slate-500 ml-auto">Auto-generated from live data</span>
+      </div>
+      <div class="space-y-2">
+        @for (ins of insights; track ins.icon; let i = $index) {
+          <div
+            [class]="'flex items-start gap-3 rounded-lg px-3 py-2.5 border animate-slideUp ' + severityBorder[ins.severity] + ' ' + severityBg[ins.severity]"
+            [style.animation-delay]="(0.35 + i * 0.06) + 's'">
+            <span class="text-sm mt-0.5">{{ ins.icon }}</span>
+            <p class="text-xs text-slate-300 leading-relaxed">{{ ins.text }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Top Risk Accounts -->
+    <div class="bg-slate-800/40 rounded-xl border border-slate-700/50 overflow-hidden animate-slideUp" [style.animation-delay]="'0.5s'">
+      <div class="px-4 py-3 border-b border-slate-700/50 flex items-center gap-2">
+        <span>🔥</span>
+        <h3 class="text-sm font-semibold text-slate-200">Top Risk Accounts</h3>
+        <span class="text-xs text-slate-500 ml-auto">
+          Ranked by high-priority open cases · Click to view full 360
+        </span>
+      </div>
+      <div class="divide-y divide-slate-700/30">
+        @for (acct of data.top_risk_accounts; track acct.Id; let i = $index) {
+          <button
+            (click)="selectAccount(acct.Id, acct.Name)"
+            class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-700/30 transition-all duration-200 text-left group">
+            <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
+              {{ i + 1 }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-slate-200 truncate group-hover:text-emerald-400 transition-colors">{{ acct.Name }}</p>
+              <p class="text-xs text-slate-500 truncate">ID: {{ acct.Id }}</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <p class="text-sm font-bold text-rose-400">{{ acct.high_pri_count }} P1/P2</p>
+              <p class="text-xs text-slate-500">{{ acct.open_case_count.toLocaleString() }} open</p>
+            </div>
+            <span class="text-slate-600 text-xs group-hover:text-emerald-400 transition-colors group-hover:translate-x-1 transform duration-200">→</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Prompt to search -->
+    <div class="text-center py-4 animate-fadeIn" [style.animation-delay]="'0.6s'">
+      <p class="text-sm text-slate-500">
+        Click an account above or search by name to see the full Customer 360 view
+      </p>
+    </div>
+  </div>
+}

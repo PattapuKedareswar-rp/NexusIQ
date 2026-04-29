@@ -1,0 +1,143 @@
+<!-- Checking state -->
+@if (checking) {
+  <div class="min-h-screen bg-slate-950 flex items-center justify-center">
+    <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+}
+
+<!-- Login -->
+@if (!checking && !authenticated) {
+  <app-login-page (onLogin)="authenticated = true"></app-login-page>
+}
+
+<!-- Main App -->
+@if (!checking && authenticated) {
+  <div class="min-h-screen bg-slate-950">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-6">
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-2xl">⚡</span>
+          <h1 class="text-lg font-bold text-slate-100 tracking-tight">NexusIQ</h1>
+          <span class="text-xs text-slate-500 hidden sm:inline">Customer Risk Cockpit</span>
+        </div>
+
+        @if (data) {
+          <button
+            (click)="handleBackToDashboard()"
+            class="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors px-3 py-1.5 rounded-lg border border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 hover:bg-emerald-500/10 animate-fadeIn">
+            <span>←</span>
+            <span>Dashboard</span>
+          </button>
+        }
+
+        <app-search-bar (onSelect)="handleSelect($event)"></app-search-bar>
+        <button
+          (click)="handleLogout()"
+          class="ml-auto flex-shrink-0 text-xs text-slate-500 hover:text-rose-400 transition-colors px-3 py-1.5 rounded-lg border border-slate-800 hover:border-rose-500/30">
+          Sign Out
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+      <!-- Loading State -->
+      @if (loading) {
+        <div class="flex items-center justify-center py-32 animate-fadeIn">
+          <div class="text-center">
+            <div class="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-slate-400 text-sm">Loading {{ accountName }}...</p>
+          </div>
+        </div>
+      }
+
+      <!-- Admin Dashboard (default view) -->
+      @if (!loading && !data) {
+        <div class="animate-fadeIn">
+          <app-admin-dashboard (onSelectAccount)="handleSelect($event)"></app-admin-dashboard>
+        </div>
+      }
+
+      <!-- Customer 360 Dashboard -->
+      @if (!loading && data) {
+        <div class="space-y-6 animate-fadeIn">
+          <!-- Account Header -->
+          <div class="flex items-center gap-4 animate-slideDown">
+            <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+              <span class="text-lg font-bold text-violet-400">
+                {{ getAccountInitial() }}
+              </span>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-slate-100">{{ data.account.Name }}</h2>
+              <p class="text-sm text-slate-500">
+                @if (data.account.Industry) { {{ data.account.Industry }} · }
+                ID: {{ data.account.Id }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Top Row: Risk + Cases + Orders -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="animate-slideUp" [style.animation-delay]="'0.05s'">
+              <app-risk-card [risk]="data.risk"></app-risk-card>
+            </div>
+            <div class="animate-slideUp" [style.animation-delay]="'0.1s'">
+              <app-cases-panel [cases]="data.cases"></app-cases-panel>
+            </div>
+            <div class="animate-slideUp" [style.animation-delay]="'0.15s'">
+              <app-orders-panel [orders]="data.orders"></app-orders-panel>
+            </div>
+          </div>
+
+          <!-- Second Row: Contacts + Health + Actions -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="animate-slideUp" [style.animation-delay]="'0.2s'">
+              <app-contacts-panel [contacts]="data.contacts"></app-contacts-panel>
+            </div>
+            <div class="animate-slideUp" [style.animation-delay]="'0.25s'">
+              <app-health-panel [healthEvents]="data.health_events" [pmes]="data.pmes"></app-health-panel>
+            </div>
+            <div class="animate-slideUp" [style.animation-delay]="'0.3s'">
+              <app-action-cards [actions]="data.actions"></app-action-cards>
+            </div>
+          </div>
+
+          <!-- Graph -->
+          <div class="animate-slideUp" [style.animation-delay]="'0.35s'">
+            <app-graph-panel [nodes]="data.graph.nodes" [edges]="data.graph.edges"></app-graph-panel>
+          </div>
+
+          <!-- Systemic Issues -->
+          <div class="animate-slideUp" [style.animation-delay]="'0.4s'">
+            <app-systemic-issues></app-systemic-issues>
+          </div>
+        </div>
+      }
+    </main>
+
+    <!-- Floating Chat Button + Panel -->
+    <button
+      (click)="toggleChat()"
+      [class]="getChatButtonClass()"
+      title="AI Assistant">
+      <span class="text-xl">{{ chatOpen ? '✕' : '💬' }}</span>
+    </button>
+
+    @if (chatOpen) {
+      <div class="fixed bottom-24 right-6 z-50 w-[420px] animate-slideUp">
+        <app-chat-panel
+          [accountId]="data?.account?.Id"
+          [accountName]="data ? '' + data.account.Name : undefined">
+        </app-chat-panel>
+      </div>
+    }
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 mt-12">
+      <div class="max-w-7xl mx-auto px-4 py-4 text-center text-xs text-slate-600">
+        NexusIQ — RealPage Global AI Hackathon 2026 · Customer Interaction Knowledge Graph
+      </div>
+    </footer>
+  </div>
+}

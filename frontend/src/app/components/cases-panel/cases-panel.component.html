@@ -1,0 +1,42 @@
+<div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Open Cases</h3>
+    <span class="text-xs font-mono text-slate-500">{{ openCases.length }} of {{ cases.length }}</span>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="flex gap-1.5 mb-3 flex-wrap">
+    <button (click)="setFilter('all')" [class]="getFilterClass('all')">
+      All ({{ getFilterCount('all') }})
+    </button>
+    <button (click)="setFilter('high')" [class]="getFilterClass('high')">
+      High ({{ getFilterCount('high') }})
+    </button>
+    <button (click)="setFilter('medium')" [class]="getFilterClass('medium')">
+      Medium ({{ getFilterCount('medium') }})
+    </button>
+    <button (click)="setFilter('low')" [class]="getFilterClass('low')">
+      Low ({{ getFilterCount('low') }})
+    </button>
+  </div>
+
+  @if (filteredCases.length === 0) {
+    <p class="text-sm text-slate-500">No {{ activeFilter === 'all' ? 'open' : activeFilter + ' priority' }} cases</p>
+  } @else {
+    <div class="space-y-2 max-h-52 overflow-y-auto">
+      @for (c of filteredCases.slice(0, 15); track c.Id) {
+        <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-900/50 hover:bg-slate-900 transition-colors">
+          <span [class]="'text-xs font-bold flex-shrink-0 px-2 py-0.5 rounded ' + priorityBadge(c.Priority)">
+            {{ priorityLabel(c.Priority) }}
+          </span>
+          <span class="text-sm text-slate-200 truncate flex-1">
+            {{ c.Subject ?? ('Case ' + (c.CaseNumber ?? c.Id)) }}
+          </span>
+          <span class="text-xs text-slate-500 flex-shrink-0">
+            {{ daysSince(c.CreatedDate) }}
+          </span>
+        </div>
+      }
+    </div>
+  }
+</div>

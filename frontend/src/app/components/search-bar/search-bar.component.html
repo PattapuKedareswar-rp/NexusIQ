@@ -1,0 +1,29 @@
+<div #wrapper class="relative w-full max-w-xl">
+  <div class="flex items-center bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 focus-within:border-emerald-500/60 transition-colors">
+    <svg class="w-5 h-5 text-slate-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input
+      type="text"
+      [(ngModel)]="query"
+      (ngModelChange)="onQueryChange()"
+      placeholder="Search customer or PMC..."
+      class="bg-transparent w-full outline-none text-slate-100 placeholder-slate-500" />
+    @if (loading) {
+      <div class="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin ml-2"></div>
+    }
+  </div>
+
+  @if (open) {
+    <ul class="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
+      @for (r of results; track r.Id) {
+        <li
+          (click)="selectResult(r)"
+          class="px-4 py-3 hover:bg-slate-700/60 cursor-pointer border-b border-slate-700/50 last:border-0 transition-colors">
+          <span class="text-slate-100 font-medium">{{ r.Name }}</span>
+          <span class="text-slate-500 text-xs ml-2">{{ r.Id }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,26 @@
+<div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Contacts</h3>
+    <span class="text-xs font-mono text-slate-500">{{ contacts.length }}</span>
+  </div>
+
+  @if (contacts.length === 0) {
+    <p class="text-sm text-slate-500">No contacts found</p>
+  } @else {
+    <div class="space-y-2 max-h-52 overflow-y-auto">
+      @for (ct of contacts.slice(0, 10); track ct.Id) {
+        <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-900/50">
+          <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+            <span class="text-xs font-bold text-violet-400">{{ getInitials(ct) }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-slate-200 truncate">{{ getContactName(ct) }}</p>
+            @if (ct.Email) {
+              <p class="text-xs text-slate-500 truncate">{{ ct.Email }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

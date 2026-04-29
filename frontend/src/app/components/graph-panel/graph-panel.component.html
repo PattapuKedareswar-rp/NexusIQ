@@ -1,0 +1,28 @@
+@if (nodes.length === 0) {
+  <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5 flex items-center justify-center h-72">
+    <p class="text-slate-500 text-sm">Select an account to view the graph</p>
+  </div>
+} @else {
+  <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Relationship Graph</h3>
+      <div class="flex gap-3 text-xs">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-violet-400"></span> Account</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span> Case</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Order</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Contact</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400"></span> Health</span>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mb-3">
+      Shows how this account connects to its cases, orders, contacts, and health events. The central node is the account — each branch represents a related entity. Hover/click nodes for details. Scroll to zoom, drag to pan.
+    </p>
+    <div #graphContainer class="w-full h-80 rounded-xl bg-slate-900/50"></div>
+    <div class="flex items-center justify-between mt-2">
+      <span class="text-xs text-slate-600">{{ nodes.length }} nodes · {{ edges.length }} connections</span>
+      @if (selectedNode) {
+        <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">{{ selectedNode }}</span>
+      }
+    </div>
+  </div>
+}

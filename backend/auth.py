@@ -5,6 +5,7 @@ Tokens persist until explicit logout.
 """
 
 import os
+import uuid
 
 import jwt
 from fastapi import Depends, HTTPException, Request
@@ -44,6 +45,7 @@ def authenticate(username: str, password: str) -> LoginResponse | None:
         payload = {
             "username": username,
             "role": "admin",
+            "jti": str(uuid.uuid4()),
         }
         token = jwt.encode(payload, _JWT_SECRET, algorithm=_JWT_ALGORITHM)
         return LoginResponse(token=token, username=username, role="admin")

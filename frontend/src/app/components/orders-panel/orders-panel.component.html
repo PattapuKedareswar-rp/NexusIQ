@@ -1,0 +1,21 @@
+<div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Implementation Orders</h3>
+    <span class="text-xs font-mono text-slate-500">{{ activeOrders.length }} active</span>
+  </div>
+
+  @if (activeOrders.length === 0) {
+    <p class="text-sm text-slate-500">No active orders</p>
+  } @else {
+    <div class="space-y-2 max-h-52 overflow-y-auto">
+      @for (o of activeOrders.slice(0, 10); track o.Id) {
+        <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-900/50">
+          <span [class]="'w-2 h-2 rounded-full flex-shrink-0 ' + (isStalled(o) ? 'bg-amber-400' : 'bg-emerald-400')"></span>
+          <span class="text-sm text-slate-200 truncate flex-1">{{ o.Name ?? o.Id }}</span>
+          <span class="text-xs text-slate-500">{{ o.Status }}</span>
+          <span class="text-xs text-slate-600">{{ daysSince(o.CreatedDate || o.EffectiveDate) }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,33 @@
+<div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Health &amp; Escalations</h3>
+    <span class="text-xs font-mono text-slate-500">
+      {{ healthEvents.length }} events · {{ pmes.length }} PMEs
+    </span>
+  </div>
+
+  @if (healthEvents.length === 0 && pmes.length === 0) {
+    <p class="text-sm text-slate-500">No health events or escalations</p>
+  } @else {
+    <div class="space-y-2 max-h-52 overflow-y-auto">
+      @for (p of pmes.slice(0, 5); track $index) {
+        <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-rose-500/5 border border-rose-500/10">
+          <span class="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span>
+          <span class="text-sm text-slate-200 truncate flex-1">
+            PME: {{ str(p['Name'] ?? p['Subject'] ?? p['Id'] ?? 'Escalation') }}
+          </span>
+          <span class="text-xs text-rose-400">{{ str(p['Status']) }}</span>
+        </div>
+      }
+      @for (h of healthEvents.slice(0, 5); track $index) {
+        <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
+          <span class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></span>
+          <span class="text-sm text-slate-200 truncate flex-1">
+            {{ str(h['Name'] ?? h['Type'] ?? 'Health Event') }}
+          </span>
+          <span class="text-xs text-amber-400">{{ str(h['CreatedDate']).slice(0, 10) }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>
