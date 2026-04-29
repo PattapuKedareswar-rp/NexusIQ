@@ -19,13 +19,28 @@ export class CasesPanelComponent {
     });
   }
 
+  private isHighPriority(p: string): boolean {
+    const v = p.toLowerCase();
+    return v.includes('high') || v.includes('critical') || v === 'p1' || v.startsWith('p1 ');
+  }
+
+  private isMediumPriority(p: string): boolean {
+    const v = p.toLowerCase();
+    return v.includes('medium') || v === 'p2' || v.startsWith('p2 ');
+  }
+
+  private isLowPriority(p: string): boolean {
+    const v = p.toLowerCase();
+    return v.includes('low') || v === 'p3' || v.startsWith('p3 ') || v === 'p4' || v.startsWith('p4 ');
+  }
+
   get filteredCases(): CaseRecord[] {
     if (this.activeFilter === 'all') return this.openCases;
     return this.openCases.filter(c => {
-      const p = (c.Priority ?? '').toLowerCase();
-      if (this.activeFilter === 'high') return p === 'high' || p === 'critical' || p === 'p1';
-      if (this.activeFilter === 'medium') return p === 'medium' || p === 'p2';
-      if (this.activeFilter === 'low') return p === 'low' || p === 'p3' || p === 'p4';
+      const p = c.Priority ?? '';
+      if (this.activeFilter === 'high') return this.isHighPriority(p);
+      if (this.activeFilter === 'medium') return this.isMediumPriority(p);
+      if (this.activeFilter === 'low') return this.isLowPriority(p);
       return true;
     });
   }
@@ -33,10 +48,10 @@ export class CasesPanelComponent {
   getFilterCount(filter: string): number {
     if (filter === 'all') return this.openCases.length;
     return this.openCases.filter(c => {
-      const p = (c.Priority ?? '').toLowerCase();
-      if (filter === 'high') return p === 'high' || p === 'critical' || p === 'p1';
-      if (filter === 'medium') return p === 'medium' || p === 'p2';
-      if (filter === 'low') return p === 'low' || p === 'p3' || p === 'p4';
+      const p = c.Priority ?? '';
+      if (filter === 'high') return this.isHighPriority(p);
+      if (filter === 'medium') return this.isMediumPriority(p);
+      if (filter === 'low') return this.isLowPriority(p);
       return false;
     }).length;
   }
@@ -65,19 +80,18 @@ export class CasesPanelComponent {
 
   priorityLabel(p: string | undefined): string {
     const v = (p ?? '').toLowerCase();
-    if (v === 'p1' || v === 'critical') return 'Critical';
-    if (v === 'high') return 'High';
-    if (v === 'p2' || v === 'medium') return 'Medium';
-    if (v === 'p3' || v === 'low') return 'Low';
-    if (v === 'p4') return 'P4';
+    if (v.includes('critical') || v === 'p1' || v.startsWith('p1 ')) return 'Critical';
+    if (v.includes('high')) return 'High';
+    if (v.includes('medium') || v === 'p2' || v.startsWith('p2 ')) return 'Medium';
+    if (v.includes('low') || v === 'p3' || v.startsWith('p3 ') || v === 'p4' || v.startsWith('p4 ')) return 'Low';
     return p ?? 'N/A';
   }
 
   priorityBadge(p: string | undefined): string {
     const v = (p ?? '').toLowerCase();
-    if (v === 'high' || v === 'critical' || v === 'p1') return 'bg-rose-500/20 text-rose-300';
-    if (v === 'medium' || v === 'p2') return 'bg-amber-500/20 text-amber-300';
-    if (v === 'low' || v === 'p3' || v === 'p4') return 'bg-slate-600/30 text-slate-400';
+    if (this.isHighPriority(v)) return 'bg-rose-500/20 text-rose-300';
+    if (this.isMediumPriority(v)) return 'bg-amber-500/20 text-amber-300';
+    if (this.isLowPriority(v)) return 'bg-slate-600/30 text-slate-400';
     return 'bg-slate-700/30 text-slate-500';
   }
 
