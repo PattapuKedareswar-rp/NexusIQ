@@ -22,6 +22,25 @@ export class SearchBarComponent implements OnDestroy {
 
   constructor(private api: ApiService) {}
 
+  onFocus() {
+    if (this.query.length < 2 && this.results.length === 0) {
+      // Show top accounts on focus if no query typed yet
+      this.loading = true;
+      this.api.searchAccounts('GREYSTAR').then(r1 => {
+        this.api.searchAccounts('RPM').then(r2 => {
+          // Merge and deduplicate
+          const map = new Map<string, SearchResult>();
+          [...r1, ...r2].forEach(r => map.set(r.Id, r));
+          this.results = Array.from(map.values()).slice(0, 10);
+          this.open = this.results.length > 0;
+          this.loading = false;
+        });
+      });
+    } else if (this.results.length > 0) {
+      this.open = true;
+    }
+  }
+
   onQueryChange() {
     if (this.query.length < 2) { this.results = []; this.open = false; return; }
     clearTimeout(this.timer);

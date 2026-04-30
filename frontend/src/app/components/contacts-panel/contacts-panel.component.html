@@ -7,8 +7,8 @@
   @if (contacts.length === 0) {
     <p class="text-sm text-slate-500">No contacts found</p>
   } @else {
-    <div class="space-y-2 max-h-52 overflow-y-auto">
-      @for (ct of contacts.slice(0, 10); track ct.Id) {
+    <div class="space-y-2 max-h-72 overflow-y-auto scrollbar-thin">
+      @for (ct of contacts; track ct.Id) {
         <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-900/50">
           <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
             <span class="text-xs font-bold text-violet-400">{{ getInitials(ct) }}</span>

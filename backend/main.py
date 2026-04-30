@@ -585,12 +585,16 @@ async def api_admin_summary(user: dict = Depends(get_current_user)):
         health_stats,
         pme_stats,
         top_accounts,
+        case_distribution,
+        case_status,
     ) = await asyncio.gather(
         _q(Q.ADMIN_CASE_STATS),
         _q(Q.ADMIN_ORDER_STATS),
         _q(Q.ADMIN_HEALTH_STATS),
         _q(Q.ADMIN_PME_STATS),
         _q(Q.ADMIN_TOP_RISK_ACCOUNTS),
+        _q(Q.ADMIN_CASE_DISTRIBUTION),
+        _q(Q.ADMIN_CASE_STATUS),
     )
 
     return {
@@ -599,6 +603,8 @@ async def api_admin_summary(user: dict = Depends(get_current_user)):
         "health": health_stats[0] if health_stats else {},
         "pmes": pme_stats[0] if pme_stats else {},
         "top_risk_accounts": top_accounts,
+        "case_distribution": case_distribution,
+        "case_status": case_status,
     }
 
 

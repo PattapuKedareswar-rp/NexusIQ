@@ -19,19 +19,31 @@ export class CasesPanelComponent {
     });
   }
 
-  private isHighPriority(p: string): boolean {
+  /** Classify priority — descriptive words (High/Medium/Low/Critical) always win over P-codes */
+  private priorityLevel(p: string): 'high' | 'medium' | 'low' | 'unknown' {
     const v = p.toLowerCase();
-    return v.includes('high') || v.includes('critical') || v === 'p1' || v.startsWith('p1 ');
+    // 1. Check descriptive words first — these are authoritative
+    if (v.includes('critical') || v.includes('high')) return 'high';
+    if (v.includes('medium')) return 'medium';
+    if (v.includes('low')) return 'low';
+    // 2. Fall back to P-codes only when no descriptive word present
+    if (v === 'p1' || v.startsWith('p1 ') || v.startsWith('p1-')) return 'high';
+    if (v === 'p2' || v.startsWith('p2 ') || v.startsWith('p2-')) return 'medium';
+    if (v === 'p3' || v.startsWith('p3 ') || v.startsWith('p3-')) return 'low';
+    if (v === 'p4' || v.startsWith('p4 ') || v.startsWith('p4-')) return 'low';
+    return 'unknown';
+  }
+
+  private isHighPriority(p: string): boolean {
+    return this.priorityLevel(p) === 'high';
   }
 
   private isMediumPriority(p: string): boolean {
-    const v = p.toLowerCase();
-    return v.includes('medium') || v === 'p2' || v.startsWith('p2 ');
+    return this.priorityLevel(p) === 'medium';
   }
 
   private isLowPriority(p: string): boolean {
-    const v = p.toLowerCase();
-    return v.includes('low') || v === 'p3' || v.startsWith('p3 ') || v === 'p4' || v.startsWith('p4 ');
+    return this.priorityLevel(p) === 'low';
   }
 
   get filteredCases(): CaseRecord[] {
@@ -79,19 +91,20 @@ export class CasesPanelComponent {
   }
 
   priorityLabel(p: string | undefined): string {
-    const v = (p ?? '').toLowerCase();
-    if (v.includes('critical') || v === 'p1' || v.startsWith('p1 ')) return 'Critical';
-    if (v.includes('high')) return 'High';
-    if (v.includes('medium') || v === 'p2' || v.startsWith('p2 ')) return 'Medium';
-    if (v.includes('low') || v === 'p3' || v.startsWith('p3 ') || v === 'p4' || v.startsWith('p4 ')) return 'Low';
+    const level = this.priorityLevel(p ?? '');
+    if (level === 'high') {
+      return (p ?? '').toLowerCase().includes('critical') ? 'Critical' : 'High';
+    }
+    if (level === 'medium') return 'Medium';
+    if (level === 'low') return 'Low';
     return p ?? 'N/A';
   }
 
   priorityBadge(p: string | undefined): string {
-    const v = (p ?? '').toLowerCase();
-    if (this.isHighPriority(v)) return 'bg-rose-500/20 text-rose-300';
-    if (this.isMediumPriority(v)) return 'bg-amber-500/20 text-amber-300';
-    if (this.isLowPriority(v)) return 'bg-slate-600/30 text-slate-400';
+    const level = this.priorityLevel(p ?? '');
+    if (level === 'high') return 'bg-rose-500/20 text-rose-300';
+    if (level === 'medium') return 'bg-amber-500/20 text-amber-300';
+    if (level === 'low') return 'bg-slate-600/30 text-slate-400';
     return 'bg-slate-700/30 text-slate-500';
   }
 

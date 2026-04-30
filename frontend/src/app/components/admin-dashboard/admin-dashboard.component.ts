@@ -18,6 +18,22 @@ interface Insight {
   severity: 'info' | 'warn' | 'critical';
 }
 
+interface ChartSegment {
+  label: string;
+  value: number;
+  color: string;
+  offset: number;
+  dashArray: string;
+  pct: string;
+}
+
+interface StatusBar {
+  label: string;
+  count: number;
+  pct: number;
+  color: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -32,6 +48,9 @@ export class AdminDashboardComponent implements OnInit {
   error = '';
   statCards: StatCard[] = [];
   insights: Insight[] = [];
+  donutSegments: ChartSegment[] = [];
+  statusBars: StatusBar[] = [];
+  donutTotal = 0;
 
   severityBorder: Record<string, string> = { info: 'border-slate-700/50', warn: 'border-amber-500/30', critical: 'border-rose-500/30' };
   severityBg: Record<string, string> = { info: 'bg-slate-800/30', warn: 'bg-amber-500/5', critical: 'bg-rose-500/5' };
@@ -49,6 +68,8 @@ export class AdminDashboardComponent implements OnInit {
       if (this.data) {
         this.buildStatCards();
         this.buildInsights();
+        this.buildDonutChart();
+        this.buildStatusBars();
       } else {
         this.error = 'Failed to load summary';
       }
@@ -134,6 +155,45 @@ export class AdminDashboardComponent implements OnInit {
         severity: d.pmes.active_pmes > 5000 ? 'critical' : 'warn',
       });
     }
+  }
+
+  private buildDonutChart() {
+    if (!this.data?.case_distribution) return;
+    const colorMap: Record<string, string> = {
+      Critical: '#f43f5e', High: '#ef4444', Medium: '#f59e0b', Low: '#64748b', Other: '#475569',
+    };
+    const items = this.data.case_distribution;
+    this.donutTotal = items.reduce((s, i) => s + i.case_count, 0);
+    const circumference = 2 * Math.PI * 50; // r=50
+    let cumOffset = 0;
+    this.donutSegments = items.map(item => {
+      const pct = this.donutTotal > 0 ? item.case_count / this.donutTotal : 0;
+      const seg: ChartSegment = {
+        label: item.priority_level,
+        value: item.case_count,
+        color: colorMap[item.priority_level] || '#475569',
+        offset: -cumOffset,
+        dashArray: `${pct * circumference} ${circumference}`,
+        pct: (pct * 100).toFixed(1) + '%',
+      };
+      cumOffset += pct * circumference;
+      return seg;
+    });
+  }
+
+  private buildStatusBars() {
+    if (!this.data?.case_status) return;
+    const colorMap: Record<string, string> = {
+      Open: 'bg-amber-500', Closed: 'bg-slate-600', Resolved: 'bg-emerald-500',
+      New: 'bg-blue-500', Escalated: 'bg-rose-500',
+    };
+    const total = this.data.case_status.reduce((s, i) => s + i.case_count, 0);
+    this.statusBars = this.data.case_status.slice(0, 6).map(item => ({
+      label: item.Status || 'Unknown',
+      count: item.case_count,
+      pct: total > 0 ? (item.case_count / total) * 100 : 0,
+      color: colorMap[item.Status] || 'bg-slate-500',
+    }));
   }
 
   selectAccount(id: string, name: string) {

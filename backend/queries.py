@@ -197,12 +197,42 @@ LIMIT @limit
 # ADMIN DASHBOARD (aggregated across all accounts)
 # ═══════════════════════════════════════════════════════
 
+ADMIN_CASE_DISTRIBUTION = f"""
+SELECT
+    CASE
+        WHEN LOWER(Priority) LIKE '%critical%' OR Priority = 'P1' OR Priority LIKE 'P1 %' OR Priority LIKE 'P1-%' THEN 'Critical'
+        WHEN LOWER(Priority) LIKE '%high%' THEN 'High'
+        WHEN LOWER(Priority) LIKE '%medium%' OR Priority = 'P2' OR Priority LIKE 'P2 %' OR Priority LIKE 'P2-%' THEN 'Medium'
+        WHEN LOWER(Priority) LIKE '%low%' OR Priority = 'P3' OR Priority LIKE 'P3 %' OR Priority LIKE 'P3-%'
+             OR Priority = 'P4' OR Priority LIKE 'P4 %' OR Priority LIKE 'P4-%' THEN 'Low'
+        ELSE 'Other'
+    END as priority_level,
+    COUNT(*) as case_count
+FROM {fqn('SFDC_Case')}
+WHERE Status NOT IN ('Closed','Resolved')
+GROUP BY priority_level
+ORDER BY case_count DESC
+"""
+
+ADMIN_CASE_STATUS = f"""
+SELECT
+    Status,
+    COUNT(*) as case_count
+FROM {fqn('SFDC_Case')}
+GROUP BY Status
+ORDER BY case_count DESC
+LIMIT 10
+"""
+
 ADMIN_CASE_STATS = f"""
 SELECT
     COUNT(*) as total_cases,
     COUNTIF(Status NOT IN ('Closed','Resolved')) as open_cases,
     COUNTIF(Status NOT IN ('Closed','Resolved')
-        AND Priority IN ('High','Critical')) as high_priority_open,
+        AND (LOWER(Priority) LIKE '%high%' OR LOWER(Priority) LIKE '%critical%'
+             OR Priority = 'P1' OR Priority LIKE 'P1 %' OR Priority LIKE 'P1-%'
+             OR Priority = 'P2' OR Priority LIKE 'P2 %' OR Priority LIKE 'P2-%'))
+        as high_priority_open,
     COUNTIF(Status NOT IN ('Closed','Resolved')
         AND CreatedDate < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY))
         as aging_cases
@@ -238,7 +268,10 @@ FROM {fqn('SFDC_ProblemManagementEscalation')}
 ADMIN_TOP_RISK_ACCOUNTS = f"""
 SELECT a.Id, a.Name,
     COUNT(c.Id) as open_case_count,
-    COUNTIF(c.Priority IN ('High','Critical')) as high_pri_count
+    COUNTIF(LOWER(c.Priority) LIKE '%high%' OR LOWER(c.Priority) LIKE '%critical%'
+            OR c.Priority = 'P1' OR c.Priority LIKE 'P1 %' OR c.Priority LIKE 'P1-%'
+            OR c.Priority = 'P2' OR c.Priority LIKE 'P2 %' OR c.Priority LIKE 'P2-%')
+        as high_pri_count
 FROM {fqn('SFDC_Accounts')} a
 JOIN {fqn('SFDC_Case')} c ON c.AccountId = a.Id
 WHERE c.Status NOT IN ('Closed','Resolved')

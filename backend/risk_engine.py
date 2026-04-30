@@ -51,9 +51,26 @@ def compute_risk(
         if str(c.get("Status", "")).lower() not in ("closed", "resolved", "")
     ]
 
-    high_pri = [c for c in open_cases if str(c.get("Priority", "")).lower() in ("high", "critical", "p1")]
-    med_pri = [c for c in open_cases if str(c.get("Priority", "")).lower() in ("medium", "p2")]
-    low_pri = [c for c in open_cases if str(c.get("Priority", "")).lower() in ("low", "p3", "p4")]
+    def _pri_level(p: str) -> str:
+        """Classify priority — descriptive words win over P-codes."""
+        v = p.lower()
+        if 'critical' in v or 'high' in v:
+            return 'high'
+        if 'medium' in v:
+            return 'medium'
+        if 'low' in v:
+            return 'low'
+        if v in ('p1',) or v.startswith('p1 ') or v.startswith('p1-'):
+            return 'high'
+        if v in ('p2',) or v.startswith('p2 ') or v.startswith('p2-'):
+            return 'medium'
+        if v in ('p3', 'p4') or v.startswith('p3 ') or v.startswith('p3-') or v.startswith('p4 ') or v.startswith('p4-'):
+            return 'low'
+        return 'unknown'
+
+    high_pri = [c for c in open_cases if _pri_level(str(c.get("Priority", ""))) == 'high']
+    med_pri = [c for c in open_cases if _pri_level(str(c.get("Priority", ""))) == 'medium']
+    low_pri = [c for c in open_cases if _pri_level(str(c.get("Priority", ""))) == 'low']
 
     if high_pri:
         pts = len(high_pri) * 3

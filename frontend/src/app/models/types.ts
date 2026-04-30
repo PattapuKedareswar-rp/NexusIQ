@@ -122,4 +122,6 @@ export interface AdminSummary {
     open_case_count: number;
     high_pri_count: number;
   }[];
+  case_distribution?: { priority_level: string; case_count: number }[];
+  case_status?: { Status: string; case_count: number }[];
 }

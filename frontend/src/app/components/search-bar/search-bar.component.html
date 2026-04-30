@@ -7,6 +7,7 @@
       type="text"
       [(ngModel)]="query"
       (ngModelChange)="onQueryChange()"
+      (focus)="onFocus()"
       placeholder="Search customer or PMC..."
       class="bg-transparent w-full outline-none text-slate-100 placeholder-slate-500" />
     @if (loading) {

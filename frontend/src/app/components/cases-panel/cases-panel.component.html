@@ -4,6 +4,21 @@
     <span class="text-xs font-mono text-slate-500">{{ openCases.length }} of {{ cases.length }}</span>
   </div>
 
+  <!-- Priority Mini Bar -->
+  @if (openCases.length > 0) {
+    <div class="flex items-center gap-1 mb-3 h-2 rounded-full overflow-hidden bg-slate-700/30">
+      @if (getFilterCount('high') > 0) {
+        <div class="h-full bg-rose-500 rounded-full transition-all" [style.width.%]="(getFilterCount('high') / openCases.length) * 100"></div>
+      }
+      @if (getFilterCount('medium') > 0) {
+        <div class="h-full bg-amber-500 rounded-full transition-all" [style.width.%]="(getFilterCount('medium') / openCases.length) * 100"></div>
+      }
+      @if (getFilterCount('low') > 0) {
+        <div class="h-full bg-slate-500 rounded-full transition-all" [style.width.%]="(getFilterCount('low') / openCases.length) * 100"></div>
+      }
+    </div>
+  }
+
   <!-- Filter Tabs -->
   <div class="flex gap-1.5 mb-3 flex-wrap">
     <button (click)="setFilter('all')" [class]="getFilterClass('all')">
@@ -23,7 +38,7 @@
   @if (filteredCases.length === 0) {
     <p class="text-sm text-slate-500">No {{ activeFilter === 'all' ? 'open' : activeFilter + ' priority' }} cases</p>
   } @else {
-    <div class="space-y-2 max-h-52 overflow-y-auto">
+    <div class="space-y-2 max-h-72 overflow-y-auto scrollbar-thin">
       @for (c of filteredCases; track c.Id) {
         <div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-900/50 hover:bg-slate-900 transition-colors">
           <span [class]="'text-xs font-bold flex-shrink-0 px-2 py-0.5 rounded ' + priorityBadge(c.Priority)">
